@@ -1,0 +1,12 @@
+{
+  "name": "buhoi-client",
+  "version": "1.0.0",
+  "description": "Client side part of buhoi framework.",
+  "main": "index.js",
+  "repository": {
+    "url": "git@github.com:titarenko/buhoi-client.git",
+    "type": "git"
+  },
+  "author": "Constantin Titarenko <constantin.titarenko@gmail.com>",
+  "license": "MIT"
+}
