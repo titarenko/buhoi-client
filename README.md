@@ -67,12 +67,26 @@ Starts routing, accepting following options:
 
 | name | type | required | description |
 | --- | --- | --- | --- |
-| createContext | function | yes | must return webpack [`require.context` instance](https://webpack.js.org/guides/dependency-management/#require-context): router will use it to require and render component according to route |
-| defaultRoute | URL string or route object | yes | default route |
+| createContext | function | yes | must return webpack [`require.context`](https://webpack.js.org/guides/dependency-management/#require-context) instance: router will use it to require and render component according to route |
+| defaultRoute | URL string or route object | yes | default route, nothing more to say |
 | reducers | array of functions | no | reducers in terms of [redux](http://redux.js.org/docs/introduction/CoreConcepts.html), order matters |
 | acceptHotUpdate | function | no | simply put `module.hot && module.hot.accept` here if you are interested in webpack HMR |
 
-Route object consists of: collection (string), action (string), id (string) and query (query string in object form). For example, URL `/books/1/edit?mode=extended` corresponds to route `{ collection: 'books', id: '1', action: 'edit', query: { mode: 'extended' } }`.
+Route object consists of:
+- `collection` (string)
+- `action` (string)
+- `id` (string)
+- and `query` (query string in object form)
+
+For example, URL `/books/1/edit?mode=extended` corresponds to route:
+```js
+{
+	collection: 'books',
+	id: '1',
+	action: 'edit',
+	query: { mode: 'extended' }
+}
+```
 
 Reducers array is used to create single reducer for redux store by employing following approach: next state is equal to first non-falsey output from any of reducers from aforementioned array, iterated in natural order. 
 
