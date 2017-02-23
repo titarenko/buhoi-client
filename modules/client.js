@@ -4,15 +4,16 @@ const { createStore } = require('redux')
 const createRouter = require('./create-router')
 const createLoader = require('./create-loader')
 const createReducer = require('./create-reducer')
+const { navigateTo } = require('./actions')
 
 const storeMiddleware = window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 
-module.exports = start
+module.exports = { start, navigateTo }
 
-function start ({ createContext, reducers, defaultRoute, initialState, container }) {
+function start ({ createContext, acceptHotUpdate, reducers, defaultRoute, initialState, container }) {
 	const root = container || document.getElementById('root')
-	const store = createStore(createReducer(reducers), initialState, storeMiddleware)
-	const loader = createLoader({ createContext })
+	const store = createStore(createReducer({ reducers }), initialState, storeMiddleware)
+	const loader = createLoader({ createContext, acceptHotUpdate })
 	const router = createRouter({ store, loader, defaultRoute })
 
 	const renderRootComponent = () => {
@@ -25,7 +26,5 @@ function start ({ createContext, reducers, defaultRoute, initialState, container
 	store.subscribe(() => setTimeout(renderRootComponent, 0))
 	loader.subscribe(() => store.dispatch({ type: 'HOT_RELOAD' }))
 
-	navigateTo(`${location.pathname || ''}${location.search || ''}`)
-
-	return { navigateTo: router.navigateTo }
+	store.dispatch(navigateTo(`${location.pathname || ''}${location.search || ''}`))
 }

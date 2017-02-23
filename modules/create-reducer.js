@@ -1,6 +1,6 @@
 module.exports = create
 
-function create (reducers = []) {
+function create ({ reducers = [] }) {
 	reducers.unshift(hotReloadReducer)
 	reducers.unshift(navigationReducer)
 
@@ -13,6 +13,10 @@ function create (reducers = []) {
 
 function navigationReducer (state, action) {
 	if (action.type == 'NAVIGATE_TO') {
+		const { route, url, silent } = action
+		if (!silent) {
+			window.history.pushState(route, document.title, url)
+		}
 		return {
 			...state,
 			route: action.route,

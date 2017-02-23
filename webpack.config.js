@@ -5,10 +5,11 @@ module.exports = {
 	output: {
 		path: __dirname,
 		filename: 'dist.js',
+		libraryTarget: 'commonjs2',
 	},
 	externals: {
-		inferno: { commonjs: 'inferno' },
-		redux: { commonjs: 'redux' },
+		inferno: { commonjs2: 'inferno' },
+		redux: { commonjs2: 'redux' },
 	},
 	module: {
 		rules: [

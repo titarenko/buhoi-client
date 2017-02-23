@@ -1,6 +1,6 @@
 module.exports = create
 
-function create (createContext) {
+function create ({ createContext, acceptHotUpdate }) {
 	let context = createContext()
 
 	return { load, subscribe }
@@ -10,10 +10,10 @@ function create (createContext) {
 	}
 
 	function subscribe (updateHandler) {
-		if (!module.hot) {
+		if (!acceptHotUpdate) {
 			return
 		}
-		module.hot.accept(context.id, function () {
+		acceptHotUpdate(context.id, function () {
 			context = createContext()
 			updateHandler()
 		})
