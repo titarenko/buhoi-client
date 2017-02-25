@@ -4,7 +4,7 @@ const queryString = require('querystring')
 module.exports = { hotReload, navigateTo }
 
 function hotReload () {
-	return { type: 'HOT_RELOAD' }
+	return { type: 'BUHOI_HOT_RELOAD' }
 }
 
 function navigateTo (route, silent) {
@@ -13,7 +13,7 @@ function navigateTo (route, silent) {
 	}
 
 	return {
-		type: 'NAVIGATE_TO',
+		type: 'BUHOI_NAVIGATE_TO',
 		route: typeof route == 'string' ? parseRoute(route) : route,
 		url: typeof route == 'string' ? route : stringifyRoute(route),
 		silent

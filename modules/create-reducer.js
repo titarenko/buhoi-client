@@ -1,32 +1,40 @@
+const get = require('lodash.get')
+
 module.exports = create
 
-function create ({ reducers = [] }) {
-	reducers.unshift(hotReloadReducer)
-	reducers.unshift(navigationReducer)
+function create ({ appReducers = [], pageReducers = [] }) {
+	const appReducer = createFirstMatchReducer(appReducers.concat([navigationReducer]))
+	const pageReducer = createFirstMatchReducer(pageReducers)
 
-	return function (state, action) {
+	return reducer
+
+	function reducer (state, action) {
+		const newState = appReducer(state, action)
+		return newState === state
+			? { ...newState, page: pageReducer(get(state, 'page', { }), action) }
+			: newState
+	}
+}
+
+function createFirstMatchReducer (reducers) {
+	return firstMatchReducer
+
+	function firstMatchReducer (state, action) {
 		let newState = null
 		reducers.some(it => newState = it(state, action))
-		return newState
+		return newState || state
 	}
 }
 
 function navigationReducer (state, action) {
-	if (action.type == 'NAVIGATE_TO') {
-		const { route, url, silent } = action
-		if (!silent) {
-			window.history.pushState(route, document.title, url)
-		}
-		return {
-			...state,
-			route: action.route,
-			page: { },
-		}
+	if (action.type != 'BUHOI_NAVIGATE_TO') {
+		return
 	}
-}
 
-function hotReloadReducer (state, action) {
-	if (action.type == 'HOT_RELOAD') {
-		return state
+	const { route, url, silent } = action
+	if (!silent) {
+		window.history.pushState(route, document.title, url)
 	}
+
+	return { ...state, route: action.route, page: { } }
 }

@@ -1,3 +1,4 @@
+const isEqual = require('lodash.isequal')
 const { navigateTo } = require('./actions')
 
 module.exports = create
@@ -12,7 +13,8 @@ function create ({ store, loader, defaultRoute }) {
 	return { getRootComponent }
 
 	function getRootComponent () {
-		const { user, route, page } = store.getState()
+		const state = store.getState()
+		const { route, page } = state
 
 		if (!route) {
 			store.dispatch(navigateTo(defaultRoute))
@@ -22,7 +24,7 @@ function create ({ store, loader, defaultRoute }) {
 		const componentName = `./${route.collection}/${route.action || 'list'}.jsx`
 		try {
 			const component = loader.load(componentName)
-			return component({ ...page, user, route, dispatch: store.dispatch })
+			return component({ ...page, app: state, dispatch: store.dispatch })
 		} catch (e) {
 			const isNotFound = e.message == `Cannot find module '${componentName}'.`
 			if (isNotFound && !isEqual(route, defaultRoute)) {
@@ -32,11 +34,4 @@ function create ({ store, loader, defaultRoute }) {
 			}
 		}
 	}
-}
-
-function isEqual (lhs, rhs) {
-	return lhs.collection == rhs.collection
-		&& lhs.action == rhs.action
-		&& lhs.id == rhs.id
-		&& lhs.query == rhs.query
 }
