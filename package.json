@@ -15,7 +15,6 @@
     "babel-preset-es2015": "^6.22.0",
     "babel-preset-stage-0": "^6.22.0",
     "inferno": "^1.3.0-rc.3",
-    "lodash.get": "^4.4.2",
     "lodash.isequal": "^4.5.0",
     "redux": "^3.6.0",
     "redux-thunk": "^2.2.0",

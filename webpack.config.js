@@ -1,7 +1,7 @@
 const webpack = require('webpack')
 
 module.exports = {
-	entry: './modules/client.js',
+	entry: './modules/index.js',
 	output: {
 		path: __dirname,
 		filename: 'dist.js',

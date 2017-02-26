@@ -1,13 +1,26 @@
 const urlParse = require('url-parse')
 const queryString = require('querystring')
 
-module.exports = { hotReload, navigateTo }
-
-function hotReload () {
-	return { type: 'BUHOI_HOT_RELOAD' }
+module.exports = {
+	reducer,
+	navigateTo,
+	start,
 }
 
-function navigateTo (route, silent) {
+function reducer (state = null, action) {
+	if (action.type != 'BUHOI_NAVIGATE_TO') {
+		return state
+	}
+
+	const { route, url, silent } = action
+	if (!silent) {
+		window.history.pushState(route, document.title, url)
+	}
+
+	return route
+}
+
+function navigateTo (route) {
 	if (!route) {
 		throw new Error('Missing parameter: route.')
 	}
@@ -16,8 +29,13 @@ function navigateTo (route, silent) {
 		type: 'BUHOI_NAVIGATE_TO',
 		route: typeof route == 'string' ? parseRoute(route) : route,
 		url: typeof route == 'string' ? route : stringifyRoute(route),
-		silent
 	}
+}
+
+function start (dispatch) {
+	window.onpopstate = ev => dispatch({ ...navigateTo(ev.state), silent: true })
+	const currentUrl = `${location.pathname || ''}${location.search || ''}`
+	dispatch(navigateTo(currentUrl))
 }
 
 function parseRoute (url) {
