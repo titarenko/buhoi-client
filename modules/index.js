@@ -7,7 +7,7 @@ const isEqual = require('lodash.isequal')
 const { render } = require('inferno')
 
 const { combineReducers } = require('redux')
-const { createScopedReducer } = require('./utils')
+const { createScopedReducer, createScopedDispatch } = require('./utils')
 
 const defaultAction = 'list'
 const defaultQuery = { }
@@ -17,7 +17,9 @@ module.exports = {
 	navigateTo,
 
 	combineReducers,
+
 	createScopedReducer,
+	createScopedDispatch,
 }
 
 function start ({ container, createContext, acceptHotUpdate, appReducer = (state = null, action) => state, defaultRoute }) {
