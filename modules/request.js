@@ -26,10 +26,9 @@ function request ({ method = 'GET', url, headers = { }, qs, body, timeout = 5000
 			reject(new Error(`${method} ${url} timed out after ${timeout} ms`))
 		}
 
-		Object.entries(headers).map(pair => instance.setRequestHeader(...pair))
 		instance.timeout = timeout
-
 		instance.open(method, qs ? `${url}?${querystring.stringify(qs)}` : url)
+		Object.entries(headers).map(pair => instance.setRequestHeader(...pair))
 
 		if (body) {
 			instance.setRequestHeader('content-type', 'application/json')

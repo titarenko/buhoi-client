@@ -1,23 +1,27 @@
 const util = require('util')
 const request = require('./request')
 
-module.exports = { read, write, setLoginRedirect }
+module.exports = { read, write, setAuthenticationFailureHandler, setPersistentHeader }
 
-function setLoginRedirect (location) {
-	if (!location) {
-		throw new Error('Cannot redirect nowhere.')
+function setAuthenticationFailureHandler (handler) {
+	if (!handler) {
+		throw new Error('Handler is required.')
 	}
-	this.loginLocation = location
+	this.authenticationFailureHandler = handler
 }
 
-function read (url, qs, operation) {
-	return rest.call(this, operation, { url, qs}, r => {
-		const resultKey = response.body && response.body.length != null ? 'items' : 'item'
-		return { type: success, [resultKey]: response.body }
-	})
+function setPersistentHeader (header) {
+	if (!header) {
+		throw new Error('Header object is required.')
+	}
+	this.persistentHeader = header
 }
 
-function write (url, body, operation) {
+function read (operation, url, qs) {
+	return rest.call(this, operation, { url, qs })
+}
+
+function write (operation, url, body) {
 	return rest.call(this, operation, { method: getMethod(), url, body })
 	function getMethod () {
 		if (url.includes('.')) { // RPC convention
@@ -27,7 +31,7 @@ function write (url, body, operation) {
 	}
 }
 
-function rest(operation, params, successAction) {
+function rest(operation, params) {
 	if (!operation) {
 		throw new Error('No operation.')
 	}
@@ -35,28 +39,38 @@ function rest(operation, params, successAction) {
 	const start = `${operation}_STARTED`
 	const success = `${operation}_SUCCEEDED`
 	const ban = `${operation}_FORBIDDEN`
+	const invalidity = `${operation}_INVALID`
 	const redirect = 'NAVIGATE_TO'
 	const failure = `${operation}_FAILED`
 
+	const finalParams = this.persistentHeader
+		? { ...params, headers: { ...params.headers, ...this.persistentHeader } }
+		: params
+
 	return dispatch => {
-		dispatch({ type: start })
-		request(params)
-			.then(r => {
-				if (r.statusCode == 401 && this.loginLocation) {
-					dispatch({ type: redirect, location: this.loginLocation })
-					return
-				}
-				if (r.statusCode == 403) {
-					dispatch({ type: ban })
-					return
-				}
-				if (r.statusCode >= 400) {
-					throw new RestRequestError(r.statusCode, r.body)
-				}
-				const successAttrs = successAction ? successAction(r) : { }
-				dispatch( { type: success, ...successAttrs })
-			})
-			.catch(e => dispatch({ type: failure, reason: e.message }))
+		dispatch({
+			type: start,
+			request: request(finalParams)
+				.then(r => {
+					if (r.statusCode == 400) {
+						dispatch({ type: invalidity, errors: r.body })
+						return
+					}
+					if (r.statusCode == 401 && this.authenticationFailureHandler) {
+						this.authenticationFailureHandler(dispatch)
+						return
+					}
+					if (r.statusCode == 403) {
+						dispatch({ type: ban })
+						return
+					}
+					if (r.statusCode >= 400) {
+						throw new RestRequestError(r.statusCode, r.body)
+					}
+					dispatch( { type: success, result: r.body })
+				})
+				.catch(e => dispatch({ type: failure, reason: e.message }))
+		})
 	}
 }
 

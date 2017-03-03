@@ -23,6 +23,6 @@ function create ({ appReducer }) {
 	return store
 
 	function pageReducer (state, action) {
-		return action.type == 'BUHOI_NAVIGATE_TO' ? { } : componentReducer(state, action)
+		return action.type == 'NAVIGATE_TO' ? { } : componentReducer(state, action)
 	}
 }

@@ -20,6 +20,9 @@ module.exports = {
 
 	createScopedReducer,
 	createScopedDispatch,
+
+	request: require('./request'),
+	rest: require('./rest'),
 }
 
 function start ({ container, createContext, acceptHotUpdate, appReducer = (state = null, action) => state, defaultRoute }) {
@@ -38,7 +41,13 @@ function start ({ container, createContext, acceptHotUpdate, appReducer = (state
 		try {
 			const component = loaderInstance.load(`./${route.collection}/${route.action || defaultAction}.jsx`)
 			storeInstance.setComponentReducer(component.reducer)
-			const dom = component({ app, route, ...page, dispatch: storeInstance.dispatch })
+			const dom = component({
+				app,
+				route,
+				...page,
+				dispatch: storeInstance.dispatch,
+				navigateTo: location => navigateTo(location || defaultRoute),
+			})
 			if (dom) {
 				render(dom, root)
 			}

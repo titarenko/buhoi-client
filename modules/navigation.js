@@ -8,28 +8,26 @@ module.exports = {
 }
 
 function reducer (state = null, action) {
-	if (action.type != 'BUHOI_NAVIGATE_TO') {
+	if (action.type != 'NAVIGATE_TO') {
 		return state
 	}
 
-	const { route, url, silent } = action
+	const { location, silent } = action
+	const route = typeof location == 'string' ? parseRoute(location) : location
+	const url = typeof location == 'string' ? location : stringifyRoute(location)
+
 	if (!silent) {
 		window.history.pushState(route, document.title, url)
 	}
 
-	return route
+	return { ...route, url }
 }
 
-function navigateTo (route) {
-	if (!route) {
-		throw new Error('Missing parameter: route.')
+function navigateTo (location) {
+	if (!location) {
+		throw new Error('Cannot navigate nowhere.')
 	}
-
-	return {
-		type: 'BUHOI_NAVIGATE_TO',
-		route: typeof route == 'string' ? parseRoute(route) : route,
-		url: typeof route == 'string' ? route : stringifyRoute(route),
-	}
+	return { type: 'NAVIGATE_TO', location }
 }
 
 function start (dispatch) {
