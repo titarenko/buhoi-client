@@ -39,22 +39,17 @@ function start (dispatch) {
 function parseRoute (url) {
 	const parsed = urlParse(url, true)
 	const tokens = parsed.pathname.slice(1).split('/')
-
-	const collection = tokens[0]
-	const id = tokens[1] == '-' ? undefined : tokens[1]
-	const action = tokens[2] || (id ? 'edit' : 'list')
-
 	return {
-		collection,
-		id,
-		action,
+		entity: tokens[0],
+		action: tokens[1],
+		id: tokens[2],
 		query: parsed.query,
 	}
 }
 
-function stringifyRoute ({ collection, id, action, query }) {
+function stringifyRoute ({ entity, id, action, query }) {
 	return '/' + [
-		[collection, id || action ? '-' : null, action].filter(Boolean).join('/'),
+		[entity, action, id].filter(Boolean).join('/'),
 		query ? queryString.stringify(query) : null,
 	].filter(Boolean).join('?')
 }
