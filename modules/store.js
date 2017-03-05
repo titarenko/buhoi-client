@@ -7,7 +7,7 @@ const navigation = require('./navigation')
 
 module.exports = { create }
 
-function create ({ appReducer }) {
+function create ({ appReducer, additionalMiddleware }) {
 	let componentReducer = (state = null, action) => state
 
 	const reducer = combineReducers({
@@ -16,7 +16,8 @@ function create ({ appReducer }) {
 		page: pageReducer,
 		version: versionReducer,
 	})
-	const middleware = applyMiddleware.apply(null, [reduxThunk, reduxDevtools].filter(Boolean))
+	const middlewareList = [reduxThunk, reduxDevtools].concat(additionalMiddleware).filter(Boolean)
+	const middleware = applyMiddleware.apply(null, middlewareList)
 	const store = createStore(reducer, undefined, middleware)
 
 	store.setComponentReducer = reducer => componentReducer = reducer

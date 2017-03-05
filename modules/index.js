@@ -22,11 +22,21 @@ module.exports = {
 	rest: require('./rest'),
 }
 
-function start ({ container, createContext, acceptHotUpdate, appReducer = (state = null, action) => state, defaultRoute }) {
+function start ({
+	container,
+
+	createContext,
+	acceptHotUpdate,
+
+	appReducer = (state = null, action) => state,
+	additionalMiddleware = [],
+
+	defaultRoute
+}) {
 	const root = container || document.getElementById('root')
 
 	const loaderInstance = loader.create({ createContext, acceptHotUpdate })
-	const storeInstance = store.create({ appReducer })
+	const storeInstance = store.create({ appReducer, additionalMiddleware })
 
 	storeInstance.subscribe(() => setTimeout(renderRootComponent, 0))
 	loaderInstance.subscribe(() => storeInstance.dispatch(navigateTo(storeInstance.getState().route)))
