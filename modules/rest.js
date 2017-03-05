@@ -52,16 +52,8 @@ function rest(operation, params) {
 			type: start,
 			request: request(finalParams)
 				.then(r => {
-					if (r.statusCode == 400) {
-						dispatch({ type: invalidity, errors: r.body })
-						return
-					}
 					if (r.statusCode == 401 && this.authenticationFailureHandler) {
 						this.authenticationFailureHandler(dispatch)
-						return
-					}
-					if (r.statusCode == 403) {
-						dispatch({ type: ban })
 						return
 					}
 					if (r.statusCode >= 400) {
@@ -69,7 +61,7 @@ function rest(operation, params) {
 					}
 					dispatch( { type: success, result: r.body })
 				})
-				.catch(e => dispatch({ type: failure, reason: e.message }))
+				.catch(e => dispatch({ type: failure, error: e }))
 		})
 	}
 }
