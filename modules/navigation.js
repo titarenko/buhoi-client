@@ -50,6 +50,13 @@ function parseRoute (url) {
 function stringifyRoute ({ entity, id, action, query }) {
 	return '/' + [
 		[entity, action, id].filter(Boolean).join('/'),
-		query ? queryString.stringify(query) : null,
+		query ? queryString.stringify(omitUndefined(query)) : null,
 	].filter(Boolean).join('?')
+}
+
+function omitUndefined (obj) {
+	return Object.entries(obj).reduce(
+		(newObj, pair) => pair[1] !== undefined ? { ...newObj, [pair[0]] : pair[1] } : newObj,
+		{ }
+	)
 }
