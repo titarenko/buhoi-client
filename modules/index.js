@@ -34,7 +34,16 @@ function start ({ container, createContext, acceptHotUpdate, appReducer = (state
 	navigation.start(storeInstance.dispatch)
 
 	function renderRootComponent () {
-		const { app, route, page } = storeInstance.getState()
+		const { app, route, page, version } = storeInstance.getState()
+
+		const routeIsSame = isSameRoute(route, route.previous, true)
+		const pageStateIsReset = version.clean && version.dirty < version.clean
+
+		if (!routeIsSame && !pageStateIsReset) {
+			storeInstance.dispatch({ type: 'RESET_PAGE_STATE' })
+			return
+		}
+
 		try {
 			const component = loaderInstance.load(`./${route.entity}/${route.action || 'index'}.jsx`)
 			storeInstance.setComponentReducer(component.reducer)
@@ -58,9 +67,15 @@ function start ({ container, createContext, acceptHotUpdate, appReducer = (state
 	}
 }
 
-function isSameRoute (lhs, rhs) {
+function isSameRoute (lhs, rhs, skipQuery) {
+	if (!lhs && rhs || lhs && !rhs) {
+		return false
+	}
+	if (lhs == null && rhs == null) {
+		return true
+	}
 	return lhs.entity == rhs.entity
 		&& (lhs.action || null) == (rhs.action || null)
 		&& lhs.id == rhs.id
-		&& isEqual(lhs.query || null, rhs.query || null)
+		&& (skipQuery || isEqual(lhs.query || null, rhs.query || null))
 }

@@ -20,7 +20,7 @@ function reducer (state = null, action) {
 		window.history.pushState(route, document.title, url)
 	}
 
-	return { ...route, url }
+	return { ...route, query: route.query || { }, url, previous: state }
 }
 
 function navigateTo (location) {
