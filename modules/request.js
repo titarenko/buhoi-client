@@ -11,22 +11,27 @@ function request ({ method = 'GET', url, headers = { }, qs, body, timeout = 5000
 			return
 		}
 
+		let timeoutId = setTimeout(() => {
+			timeoutId = null
+			unsubscribe()
+			reject(new Error(`${method} ${url} timed out after ${timeout} ms`))
+		}, timeout)
+
 		const instance = new XMLHttpRequest()
 
 		instance.onreadystatechange = e => {
-			if (instance.readyState != 4) {
+			if (instance.readyState != 4 || timeoutId == null) {
 				return
 			}
+			clearTimeout(timeoutId)
 			unsubscribe()
-			resolve({ statusCode: instance.status, body: getResponseBody(instance) })
+			if (instance.status == 0) {
+				reject(new Error('No response received from server, probably network error.'))
+			} else {
+				resolve({ statusCode: instance.status, body: getResponseBody(instance) })
+			}
 		}
 
-		instance.ontimeout = e => {
-			unsubscribe()
-			reject(new Error(`${method} ${url} timed out after ${timeout} ms`))
-		}
-
-		instance.timeout = timeout
 		instance.open(method, qs ? `${url}?${querystring.stringify(qs)}` : url)
 		Object.entries(headers).map(pair => instance.setRequestHeader(...pair))
 
@@ -37,9 +42,9 @@ function request ({ method = 'GET', url, headers = { }, qs, body, timeout = 5000
 			instance.send()
 		}
 
+
 		function unsubscribe () {
 			instance.onreadystatechange = null
-			instance.ontimeout = null
 		}
 	}
 }
