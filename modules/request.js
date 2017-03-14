@@ -19,7 +19,7 @@ function request ({ method = 'GET', url, headers = { }, qs, body, timeout = 5000
 
 		const instance = new XMLHttpRequest()
 
-		instance.onreadystatechange = e => {
+		instance.onreadystatechange = ev_ => {
 			if (instance.readyState != 4 || timeoutId == null) {
 				return
 			}

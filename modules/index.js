@@ -28,10 +28,10 @@ function start ({
 	createContext,
 	acceptHotUpdate,
 
-	appReducer = (state = null, action) => state,
+	appReducer = (state = null, action_) => state,
 	additionalMiddleware = [],
 
-	defaultRoute
+	defaultRoute,
 }) {
 	const root = container || document.getElementById('root')
 

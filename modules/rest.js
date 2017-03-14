@@ -1,7 +1,13 @@
 const util = require('util')
 const request = require('./request')
 
-module.exports = { read, write, remove, setAuthenticationFailureHandler, setPersistentHeader }
+module.exports = {
+	read,
+	write,
+	remove,
+	setAuthenticationFailureHandler,
+	setPersistentHeader,
+}
 
 function setAuthenticationFailureHandler (handler) {
 	if (!handler) {
@@ -44,9 +50,6 @@ function rest (operation, params) {
 
 	const start = `${operation}_STARTED`
 	const success = `${operation}_SUCCEEDED`
-	const ban = `${operation}_FORBIDDEN`
-	const invalidity = `${operation}_INVALID`
-	const redirect = 'NAVIGATE_TO'
 	const failure = `${operation}_FAILED`
 
 	const finalParams = this.persistentHeader
@@ -65,9 +68,9 @@ function rest (operation, params) {
 					if (r.statusCode >= 400) {
 						throw new RestRequestError(r.statusCode, r.body)
 					}
-					dispatch( { type: success, result: r.body })
+					dispatch({ type: success, result: r.body })
 				})
-				.catch(e => dispatch({ type: failure, error: e }))
+				.catch(e => dispatch({ type: failure, error: e })),
 		})
 	}
 }

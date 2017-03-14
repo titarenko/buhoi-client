@@ -8,7 +8,7 @@ const navigation = require('./navigation')
 module.exports = { create }
 
 function create ({ appReducer, additionalMiddleware }) {
-	let componentReducer = (state = null, action) => state
+	let componentReducer = (state = null, action_) => state
 
 	const reducer = combineReducers({
 		app: appReducer,

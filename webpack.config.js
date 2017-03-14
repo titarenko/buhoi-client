@@ -1,5 +1,3 @@
-const webpack = require('webpack')
-
 module.exports = {
 	entry: './modules/index.js',
 	output: {
@@ -18,9 +16,7 @@ module.exports = {
 				exclude: /node_modules/,
 				use: {
 					loader: 'babel-loader',
-					options: {
-						presets: ['stage-0', 'es2015'],
-					},
+					options: { presets: ['stage-0', 'es2015'] },
 				},
 			},
 		],
