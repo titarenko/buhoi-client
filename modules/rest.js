@@ -1,7 +1,7 @@
 const util = require('util')
 const request = require('./request')
 
-module.exports = { read, write, setAuthenticationFailureHandler, setPersistentHeader }
+module.exports = { read, write, remove, setAuthenticationFailureHandler, setPersistentHeader }
 
 function setAuthenticationFailureHandler (handler) {
 	if (!handler) {
@@ -22,16 +22,22 @@ function read (operation, url, qs) {
 }
 
 function write (operation, url, body) {
-	return rest.call(this, operation, { method: getMethod(), url, body })
-	function getMethod () {
-		if (url.includes('.')) { // RPC convention
-			return 'POST'
-		}
-		return body && body.id ? 'PUT' : 'POST'
+	if (url.includes('.')) { // RPC convention
+		return rest.call(this, operation, { method: 'POST', url, body })
+	} else {
+		return rest.call(this, operation, {
+			method: body.id ? 'PUT' : 'POST',
+			url: body.id ? `${url}/${body.id}` : url,
+			body,
+		})
 	}
 }
 
-function rest(operation, params) {
+function remove (operation, url, id) {
+	return rest.call(this, operation, { url: `${url}/${id}`, method: 'DELETE' })
+}
+
+function rest (operation, params) {
 	if (!operation) {
 		throw new Error('No operation.')
 	}
@@ -69,7 +75,8 @@ function rest(operation, params) {
 function RestRequestError (statusCode, body) {
 	this.statusCode = statusCode
 	this.body = body
-	Error.call(this, `Request failed with status code ${statusCode} and body "${body}".`)
+	this.message = `Request failed with status code ${statusCode} and body "${body}".`
+	Error.call(this, this.message)
 	Error.captureStackTrace(this, RestRequestError)
 }
 
