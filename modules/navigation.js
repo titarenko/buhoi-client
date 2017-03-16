@@ -1,9 +1,15 @@
 const urlParse = require('url-parse')
 const queryString = require('querystring')
 
+let defaultRoute
+
 module.exports = {
 	reducer,
+
 	navigateTo,
+	setQueryParams,
+
+	setDefaultRoute,
 	start,
 }
 
@@ -12,7 +18,7 @@ function reducer (state = null, action) {
 		return state
 	}
 
-	const { location, silent } = action
+	const { location = defaultRoute, silent } = action
 	const route = typeof location == 'string' ? parseRoute(location) : location
 	const url = typeof location == 'string' ? location : stringifyRoute(location)
 
@@ -24,10 +30,18 @@ function reducer (state = null, action) {
 }
 
 function navigateTo (location) {
-	if (!location) {
-		throw new Error('Cannot navigate nowhere.')
-	}
 	return { type: 'NAVIGATE_TO', location }
+}
+
+function setQueryParams (keyValues) {
+	return (dispatch, getState) => {
+		const route = getState().route
+		return dispatch(navigateTo({ ...route, query: { ...route.query, ...keyValues } }))
+	}
+}
+
+function setDefaultRoute (route) {
+	defaultRoute = route
 }
 
 function start (dispatch) {

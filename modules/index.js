@@ -2,7 +2,7 @@ const navigation = require('./navigation')
 const loader = require('./loader')
 const store = require('./store')
 
-const { navigateTo } = navigation
+const { navigateTo, setQueryParams } = navigation
 const isEqual = require('lodash.isequal')
 const { render } = require('inferno')
 
@@ -11,7 +11,9 @@ const { createScopedReducer, createScopedDispatch } = require('./utils')
 
 module.exports = {
 	start,
+
 	navigateTo,
+	setQueryParams,
 
 	combineReducers,
 
@@ -41,6 +43,7 @@ function start ({
 	storeInstance.subscribe(() => setTimeout(renderRootComponent, 0))
 	loaderInstance.subscribe(() => storeInstance.dispatch(navigateTo(storeInstance.getState().route)))
 
+	navigation.setDefaultRoute(defaultRoute)
 	navigation.start(storeInstance.dispatch)
 
 	function renderRootComponent () {
@@ -62,7 +65,6 @@ function start ({
 				route,
 				...page,
 				dispatch: storeInstance.dispatch,
-				navigateTo: location => navigateTo(location || defaultRoute),
 			})
 			if (dom) {
 				render(dom, root)
