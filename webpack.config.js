@@ -1,14 +1,11 @@
 module.exports = {
-	entry: './modules/index.js',
+	entry: './lib/index.js',
 	output: {
-		path: __dirname,
-		filename: 'dist.js',
+		path: `${__dirname}/dist`,
+		filename: 'bundle.js',
 		libraryTarget: 'commonjs2',
 	},
-	externals: {
-		inferno: { commonjs2: 'inferno' },
-		redux: { commonjs2: 'redux' },
-	},
+	externals: { inferno: { commonjs2: 'inferno' } },
 	module: {
 		rules: [
 			{

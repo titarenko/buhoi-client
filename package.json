@@ -2,13 +2,16 @@
   "name": "buhoi-client",
   "version": "2.0.0",
   "description": "Client side part of buhoi framework.",
-  "main": "dist.js",
+  "main": "dist/bundle.js",
   "repository": {
     "url": "git@github.com:titarenko/buhoi-client.git",
     "type": "git"
   },
   "author": "Constantin Titarenko <constantin.titarenko@gmail.com>",
   "license": "MIT",
+  "peerDependencies": {
+    "inferno": "^1.4.2"
+  },
   "devDependencies": {
     "babel-core": "^6.23.1",
     "babel-eslint": "^7.1.1",
@@ -17,10 +20,9 @@
     "babel-preset-stage-0": "^6.22.0",
     "eslint": "^3.17.1",
     "eslint-plugin-func-call": "^1.0.3",
-    "eslint-plugin-react": "^6.10.0",
     "eslint-plugin-require-path-exists": "^1.1.5",
     "husky": "^0.13.2",
-    "inferno": "^1.3.0-rc.3",
+    "inferno": "^1.4.2",
     "lint-staged": "^3.4.0",
     "lodash.isequal": "^4.5.0",
     "redux": "^3.6.0",
@@ -31,7 +33,7 @@
   "scripts": {
     "start": "webpack -w",
     "build": "webpack -p",
-    "lint": "eslint . --ext .js,.jsx",
+    "lint": "eslint . --ext .js",
     "precommit": "lint-staged",
     "prepush": "npm run lint",
     "release": "npm run lint && npm run build && npm version patch && npm publish && git push && git push --tags"
