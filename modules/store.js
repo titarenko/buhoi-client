@@ -1,26 +1,27 @@
 const { createStore, combineReducers, applyMiddleware } = require('redux')
-
 const reduxThunk = require('redux-thunk').default
-const reduxDevtools = window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
-
 const navigation = require('./navigation')
+
+const emptyReducer = (state = null, action_) => state
 
 module.exports = { create }
 
-function create ({ appReducer, additionalMiddleware }) {
-	let componentReducer = (state = null, action_) => state
+function create ({ routeReducer = navigation.reducer, appReducer = emptyReducer, additionalMiddleware = [] }) {
+	let componentReducer = emptyReducer
 
 	const reducer = combineReducers({
+		route: routeReducer,
 		app: appReducer,
-		route: navigation.reducer,
 		page: pageReducer,
 		version: versionReducer,
 	})
-	const middlewareList = [reduxThunk, reduxDevtools].concat(additionalMiddleware).filter(Boolean)
-	const middleware = applyMiddleware.apply(null, middlewareList)
-	const store = createStore(reducer, undefined, middleware)
 
-	store.setComponentReducer = reducer => componentReducer = reducer
+	const middleware = [reduxThunk].concat(additionalMiddleware).filter(Boolean)
+	const enhancer = applyMiddleware(...middleware)
+
+	const store = createStore(reducer, enhancer)
+
+	store.setComponentReducer = reducer => componentReducer = reducer || emptyReducer
 
 	return store
 

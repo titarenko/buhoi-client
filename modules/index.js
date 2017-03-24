@@ -1,24 +1,24 @@
-const navigation = require('./navigation')
+const { render } = require('inferno')
+const { combineReducers } = require('redux')
+const isEqual = require('lodash.isequal')
+
 const loader = require('./loader')
 const store = require('./store')
-
+const navigation = require('./navigation')
 const { navigateTo, setQueryParams } = navigation
-const isEqual = require('lodash.isequal')
-const { render } = require('inferno')
-
-const { combineReducers } = require('redux')
 const { createScopedReducer, createScopedDispatch } = require('./utils')
 
 module.exports = {
 	start,
 
-	navigateTo,
-	setQueryParams,
-
 	combineReducers,
 
 	createScopedReducer,
 	createScopedDispatch,
+
+	routeReducer: navigation.reducer,
+	navigateTo,
+	setQueryParams,
 
 	request: require('./request'),
 	rest: require('./rest'),
@@ -30,24 +30,25 @@ function start ({
 	createContext,
 	acceptHotUpdate,
 
-	appReducer = (state = null, action_) => state,
-	additionalMiddleware = [],
+	routeReducer,
+	appReducer,
+	additionalMiddleware,
 
 	defaultRoute,
 }) {
 	const root = container || document.getElementById('root')
 
 	const loaderInstance = loader.create({ createContext, acceptHotUpdate })
-	const storeInstance = store.create({ appReducer, additionalMiddleware })
+	const storeInstance = store.create({ routeReducer, appReducer, additionalMiddleware })
 
 	storeInstance.subscribe(() => setTimeout(renderRootComponent, 0))
-	loaderInstance.subscribe(() => storeInstance.dispatch(navigateTo(storeInstance.getState().route)))
+	loaderInstance.subscribe(() => storeInstance.dispatch({ type: 'HOT_RELOAD' }))
 
 	navigation.setDefaultRoute(defaultRoute)
 	navigation.start(storeInstance.dispatch)
 
 	function renderRootComponent () {
-		const { app, route, page, version } = storeInstance.getState()
+		const { route, app, page, version } = storeInstance.getState()
 
 		const routeIsSame = isSameRoute(route, route.previous, true)
 		const pageStateIsReset = version.clean && version.dirty < version.clean
@@ -61,8 +62,8 @@ function start ({
 			const component = loaderInstance.load(`./${route.entity}/${route.action || 'index'}.jsx`)
 			storeInstance.setComponentReducer(component.reducer)
 			const dom = component({
-				app,
 				route,
+				app,
 				...page,
 				dispatch: storeInstance.dispatch,
 			})
