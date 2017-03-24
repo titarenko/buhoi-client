@@ -23,7 +23,8 @@ buhoi.start({
 ```jsx
 // pages/greetings/index.jsx
 
-const { actions: { navigateTo }, combineReducers } = require('buhoi-client')
+const { combineReducers } = require('redux')
+const { actions: { navigateTo } } = require('buhoi-client')
 
 module.exports = Greetings
 module.exports.reducer = combineReducers({ someText: someTextReducer })
