@@ -1,15 +1,15 @@
-module.exports = { createScopedReducer, createScopedDispatch }
+module.exports = { createReducer, createDispatch }
 
-function createScopedReducer (scope, reducer) {
+function createReducer (scope, reducer) {
 	return (state, action) => state === undefined || action.scope == scope
 		? reducer(state, action)
 		: state
 }
 
-function createScopedDispatch (scope, dispatch) {
+function createDispatch (scope, dispatch) {
 	return action => typeof action == 'function'
 		? dispatch((thunkDispatch, ...thunkExtraArgs) => action(
-			createScopedDispatch(scope, thunkDispatch),
+			createDispatch(scope, thunkDispatch),
 			...thunkExtraArgs
 		))
 		: dispatch({ ...action, scope })
