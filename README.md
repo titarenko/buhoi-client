@@ -15,8 +15,8 @@ const buhoi = require('buhoi-client')
 
 buhoi.start({
 	createContext: () => require.context('./pages', true, /\.jsx$/),
-	defaultRoute: { entity: 'greetings' },
 	acceptHotUpdate: module.hot && module.hot.accept,
+	defaultRoute: '/greetings',
 })
 ```
 
