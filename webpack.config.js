@@ -5,7 +5,10 @@ module.exports = {
 		filename: 'bundle.js',
 		libraryTarget: 'commonjs2',
 	},
-	externals: { inferno: { commonjs2: 'inferno' } },
+	externals: {
+		inferno: { commonjs2: 'inferno' },
+		redux: { commonjs2: 'redux' },
+	},
 	module: {
 		rules: [
 			{

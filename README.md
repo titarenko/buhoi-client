@@ -9,116 +9,185 @@ Provide loading of [stateless functional components](http://frontendinsights.com
 ## Example
 
 ```js
-
 // index.js
 
 const buhoi = require('buhoi-client')
 
 buhoi.start({
-	createContext: () => require.context('./entities', true, /\.jsx$/),
-	defaultRoute: { collection: 'greetings' },
-	reducers: [assign],
+	createContext: () => require.context('./pages', true, /\.jsx$/),
+	defaultRoute: { entity: 'greetings' },
 	acceptHotUpdate: module.hot && module.hot.accept,
 })
-
-function assign (state, action) {
-	if (action.type == 'ASSIGN') {
-		return { ...state, page: { [action.key]: action.value } }
-	}
-}
 ```
 
 ```jsx
+// pages/greetings/index.jsx
 
-// entities/greetings/list.jsx
+const { actions: { navigateTo }, combineReducers } = require('buhoi-client')
 
-const { navigateTo } = require('buhoi-client')
+module.exports = Greetings
+module.exports.reducer = combineReducers({ someText: someTextReducer })
 
-module.exports = function ({ route, dispatch, someText }) {
+function Greetings ({ someText, route, dispatch }) {
 	return <div>
-		<h1 onClick={() => dispatch(navigateTo('/params?a=1'))}>Hi!</h1>
-		<h1 onClick={() => dispatch(navigateTo({ collection: 'params', query: { a: 2 }))}>Hola!</h1>
-		<input type="text" onInput={e => dispatch(assign('someText', e.target.value))} value={someText} />
+		<h1 onClick={() => dispatch(navigateTo('/other-page?a=1'))}>Hi!</h1>
+		<h1 onClick={() => dispatch(navigateTo({ entity: 'other-page', query: { a: 2 }))}>Hola!</h1>
+		<input type="text" onInput={e => dispatch(setSomeText(e.target.value))} value={someText} />
 		<p>Change this, save file, and observe following text unchanged: {someText}</p>
 	</div>
 }
 
-function assign (key, value) {
-	return { type: "ASSIGN", key, value }
+function someTextReducer (state = '', action) {
+	switch (action.type) {
+		case 'SET_SOME_TEXT': return action.text
+		default: return state
+	}
+}
+
+function setSomeText (text) {
+	return { type: 'SET_SOME_TEXT', text }
 }
 ```
 
 ```jsx
-
-// entities/params/list.jsx
+// entities/other-page/index.jsx
 
 module.exports = function ({ route }) {
 	return <h1>Param A is {route.query.a}</h1>
 }
 ```
 
-## Reference
+## Concept
 
-As you could notice from example, `buhoi-client` provides you with two functions: `start` and `navigateTo`.
+* client application consists of pages
+* each page is a stateless functional component with dedicated reducer (although reducer is optional)
+* application state has two parts: persistent (`app`) and changing (`page` and `route` as page ID)
+* whenever route changes, previous page state is lost, new page loaded and rendered, receiving complete application state (plus `dispatch`) as props
+
+## API Reference
 
 ### start(options)
 
-Starts routing, accepting following options:
+Function, starts client application, accepting following options.
 
-| name | type | required | description |
-| --- | --- | --- | --- |
-| createContext | function | yes | must return webpack [`require.context`](https://webpack.js.org/guides/dependency-management/#require-context) instance: router will use it to require and render component according to route |
-| defaultRoute | URL string or route object | yes | default route, nothing more to say |
-| reducers | array of functions | no | reducers in terms of [redux](http://redux.js.org/docs/introduction/CoreConcepts.html), order matters |
-| acceptHotUpdate | function | no | simply put `module.hot && module.hot.accept` here if you are interested in webpack HMR |
+#### createContext
 
-Route object consists of:
-- `collection` (string)
-- `action` (string)
-- `id` (string)
-- and `query` (query string in object form)
+Requied: **yes**
 
-For example, URL `/books/1/edit?mode=extended` corresponds to route:
+Function, must return webpack [`require.context`](https://webpack.js.org/guides/dependency-management/#require-context) instance. Is used by router to require and render component according to route.
+
+#### acceptHotUpdate
+
+Function, must be falsey, or equal to `module.hot.accept`, provided by webpack. Simply **put `module.hot && module.hot.accept` here** if you want to enable hot reload.
+
+#### defaultRoute
+
+Requred: **yes**
+
+String or `{ entity, action, id, query }` object, representing default route.
+
+As example, route-string `/books/edit/1?mode=extended` corresponds to route-object
 ```js
 {
-	collection: 'books',
-	id: '1',
+	entity: 'books',
 	action: 'edit',
+	id: '1',
 	query: { mode: 'extended' }
 }
 ```
 
-Reducers array is used to create single reducer for redux store by employing following approach: next state is equal to first non-falsey output from any of reducers from aforementioned array, iterated in natural order. 
+#### loginRoute
 
-### navigateTo(route[, silent])
+Required: no
 
-Navigates to given route (specified as route object, or URL string). Silent mode (boolean) prevents URL change in browser.
+String or `{ entity, action, id, query }` object, representing login route. Is used by default route reducer in case if any REST action returns 401 (not authenticated) or 403 (forbidden).
 
-## Behavior
+#### routeReducer
 
-### Routing
+Required: no
 
-Determine component according to rules:
+Custom route reducer. In most cases you do not need to override default routing behaviour, but, if you need, it can be done by providing route reducer.
 
-- if there is no route (URL is `/`), then navigate to default route
-- if there is no action (URL is `/collection`), then load and render `collection/list.jsx`
-- if there is action (URL is `/collection/id/action`), then load and render `collection/action.jsx`
-- if there is dash (`-`) in place of id (URL is `/collection/-/action`), then assume id is `undefined`
+#### appReducer
 
-Listen to [`popstate`](https://developer.mozilla.org/en-US/docs/Web/Events/popstate), call `navigateTo` silently.
-Use [`pushState`](https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_pushState()_method) when `navigateTo` is called (unless silent).
+Required: no
 
-Do not forget to assign empty object to `page` property of state to prevent interference between successive pages.
+Reducer for persistent part of application state (`app`). As example, `app` reducer can handle authentication-related actions, returing `{ user }` state.
 
-### Loading
+#### middleware
 
-Simply call `context.require('collection/action.jsx')`.
+Required: no
 
-### Rendering
+Array of middleware functions. As example, you could put here [redux-thunk](https://github.com/gaearon/redux-thunk), also you could pass [redux-logger](https://github.com/evgenyrodionov/redux-logger) middleware in `development` environment.
 
-Not much complicated, call `component({ route, dispatch, ...page })`, where `dispatch` is method of redux store, and both `route` and `page` are properties of object, returned by `getState` method of store. Then pass the result (virtual DOM) to `render` method of [inferno](https://github.com/infernojs/inferno).
+#### containerDomNode
 
-Do the same when state or components (HMR) change.
+Required: no
+
+`DOMNode` used for rendering of virtual node, returned by page component. By default, it's element with ID "root".
+
+### scope
+
+Object, represents dictionary of scope-related functions.
+
+#### createDispatch(scope, dispatch)
+
+Function, creates scoped dispatch function. Scoped means that each action dispatched by it will contain `scope` property. 
+
+#### createReducer(scope, reducer)
+
+Function, creates scoped reducer function. Scoped means that reducer will process actions of given scope, ignoring others.
+
+### actions
+
+Object, represents dictionary of actions.
+
+#### navigateTo(route[, silent])
+
+Function, creates route change action. If `silent` is `true`, then URL change will be prevented.
+
+#### changeQuery(keyValues[, replace])
+
+Functon, creates route query change action. If `replace` is `true`, then query will be replaced by `keyValues`, otherwise it will be extended by `keyValues`. Note, you can pass `{ param: undefined }` to get rid of `param` query parameter.
+
+You must provide `redux-thunk` middleware to use this action.
+
+#### read(operationName, url[, qs])
+
+Function, creates read action. Whenever it's dispatched:
+
+- `GET` request is started using given `url` and `qs` (query string object)
+- ``${operationName}_STARTED`` is fired with `request` property (reference to request promise)
+- once request succeeded, ``${operationName}_SUCCEEDED`` is fired with `result` property (reference to response body)
+- in case of error, ``{$operatioName}_FAILED`` is dispatched with `error` property (in most cases it will be of type `RestRequestError`)
+
+You must provide `redux-thunk` middleware to use this action.
+
+#### write(operationName, url, body)
+
+Function, creates write action. Whenever it's dispatched:
+
+- `POST` request is started using given `url` and `body`
+- ``${operationName}_STARTED`` is fired with `request` property (reference to request promise)
+- once request succeeded, ``${operationName}_SUCCEEDED`` is fired with `result` property (reference to response body)
+- in case of error, ``{$operatioName}_FAILED`` is dispatched with `error` property (in most cases it will be of type `RestRequestError`)
+
+You must provide `redux-thunk` middleware to use this action.
+
+#### remove(operationName, url)
+
+Function, creates remove action. Whenever it's dispatched:
+
+- `DELETE` request is started using given `url`
+- ``${operationName}_STARTED`` is fired with `request` property (reference to request promise)
+- once request succeeded, ``${operationName}_SUCCEEDED`` is fired
+- in case of error, ``{$operatioName}_FAILED`` is dispatched with `error` property (in most cases it will be of type `RestRequestError`)
+
+You must provide `redux-thunk` middleware to use this action.
+
+### RestRequestError
+
+Error, represents REST request error, consisting of `statusCode` and `body` properties, corresponding to ones from response.
 
 ## Motivation
 

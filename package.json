@@ -10,7 +10,8 @@
   "author": "Constantin Titarenko <constantin.titarenko@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
-    "inferno": "^1.4.2"
+    "inferno": "^1.4.2",
+    "redux": "^3.6.0"
   },
   "devDependencies": {
     "babel-core": "^6.23.1",
@@ -26,9 +27,11 @@
     "lint-staged": "^3.4.0",
     "lodash.isequal": "^4.5.0",
     "redux": "^3.6.0",
-    "redux-thunk": "^2.2.0",
     "url-parse": "^1.1.7",
     "webpack": "^2.2.1"
+  },
+  "optionalDependencies": {
+    "redux-thunk": "^2.2.0"
   },
   "scripts": {
     "start": "webpack -w",
