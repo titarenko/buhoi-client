@@ -1,12 +1,15 @@
 const { createStore, combineReducers, applyMiddleware } = require('redux')
 const reduxThunk = require('redux-thunk').default
-const navigation = require('./navigation')
 
 const emptyReducer = (state = null, action_) => state
 
 module.exports = { create }
 
-function create ({ routeReducer = navigation.reducer, appReducer = emptyReducer, additionalMiddleware = [] }) {
+function create ({ routeReducer, appReducer = emptyReducer, additionalMiddleware = [] }) {
+	if (typeof routeReducer != 'function') {
+		throw new Error('Required: routeReducer.')
+	}
+
 	let componentReducer = emptyReducer
 
 	const reducer = combineReducers({

@@ -1,27 +1,7 @@
 const util = require('util')
 const request = require('./request')
 
-module.exports = {
-	read,
-	write,
-	remove,
-	setAuthenticationFailureHandler,
-	setPersistentHeader,
-}
-
-function setAuthenticationFailureHandler (handler) {
-	if (!handler) {
-		throw new Error('Handler is required.')
-	}
-	this.authenticationFailureHandler = handler
-}
-
-function setPersistentHeader (header) {
-	if (!header) {
-		throw new Error('Header object is required.')
-	}
-	this.persistentHeader = header
-}
+module.exports = { actions: { read, write, remove } }
 
 function read (operation, url, qs) {
 	return rest.call(this, operation, { url, qs })
@@ -52,19 +32,11 @@ function rest (operation, params) {
 	const success = `${operation}_SUCCEEDED`
 	const failure = `${operation}_FAILED`
 
-	const finalParams = this.persistentHeader
-		? { ...params, headers: { ...params.headers, ...this.persistentHeader } }
-		: params
-
 	return dispatch => {
 		dispatch({
 			type: start,
-			request: request(finalParams)
+			request: request(params)
 				.then(r => {
-					if (r.statusCode == 401 && this.authenticationFailureHandler) {
-						this.authenticationFailureHandler(dispatch)
-						return
-					}
 					if (r.statusCode >= 400) {
 						throw new RestRequestError(r.statusCode, r.body)
 					}
@@ -78,7 +50,7 @@ function rest (operation, params) {
 function RestRequestError (statusCode, body) {
 	this.statusCode = statusCode
 	this.body = body
-	this.message = `Request failed with status code ${statusCode} and body "${body}".`
+	this.message = String(body || statusCode || 'REST request failed')
 	Error.call(this, this.message)
 	Error.captureStackTrace(this, RestRequestError)
 }
