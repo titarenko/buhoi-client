@@ -79,6 +79,8 @@ Function, must return webpack [`require.context`](https://webpack.js.org/guides/
 
 #### acceptHotUpdate
 
+Required: no
+
 Function, must be falsey, or equal to `module.hot.accept`, provided by webpack. Simply **put `module.hot && module.hot.accept` here** if you want to enable hot reload.
 
 #### defaultRoute
