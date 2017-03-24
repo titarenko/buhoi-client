@@ -20,7 +20,7 @@ buhoi.start({
 })
 ```
 
-```jsx
+```babel
 // pages/greetings/index.jsx
 
 const { combineReducers } = require('redux')
@@ -50,7 +50,7 @@ function setSomeText (text) {
 }
 ```
 
-```jsx
+```babel
 // entities/other-page/index.jsx
 
 module.exports = function ({ route }) {
