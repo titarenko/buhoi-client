@@ -1,6 +1,6 @@
 {
   "name": "buhoi-client",
-  "version": "2.0.13",
+  "version": "2.1.0",
   "description": "Client side part of buhoi framework.",
   "main": "dist/bundle.js",
   "repository": {

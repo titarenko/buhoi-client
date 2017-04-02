@@ -8,6 +8,7 @@ module.exports = {
 		XMLHttpRequest: true,
 		setTimeout: true,
 		clearTimeout: true,
+		requestAnimationFrame: true,
 
 		require: true,
 		module: true,
