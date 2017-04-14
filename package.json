@@ -44,5 +44,9 @@
   "babel": {},
   "lint-staged": {
     "*.js": "eslint"
+  },
+  "dependencies": {
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-es2017": "^6.24.1"
   }
 }
